@@ -1,26 +1,31 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const uuidv4 = require('uuid/v4');
 const multer = require("multer");
+
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+  
+      cb(null, './uploads');
+    },
+    filename: (req, file, cb) => {
+      const newFilename = `${uuidv4()}${path.extname(file.originalname)}`;
+      cb(null, newFilename);
+    },
+  });
+  
+const upload = multer({ storage });
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/upload', (req,res) => {
-  var data = req.body;
-  console.log(data);
+
+app.post('/',upload.single('file'), (req,res) => {
+  res.send();
 });
-
-if (process.env.NODE_ENV === 'production') {
-  // Set static folder
-  app.use(express.static('client/build'));
-
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
-  });
-}
 
 const port = process.env.PORT || 5000;
 
